@@ -10,6 +10,5 @@ usage steps:
 - Users can also comment and uncomment the line 13 and 14 in the config/underwater.json to change for the training process. And execute train.py for training.
 - search_diffussion.py is used to search the sequence of time steps with the evolutionary algorithm. Users can use it in the inference process.
 
-P.S. The author is so lazy that he doesn't want to write down more instructions.
 
 
