@@ -28,10 +28,10 @@
         "val": {
             "name": "quai",
             "mode": "HR",
-            "dataroot": "dataset/quai_background_64_512",
+            "dataroot": "dataset/quai_background_16_256",
             "datatype": "img",
-            "l_resolution": 64,
-            "r_resolution": 512,
+            "l_resolution": 16,
+            "r_resolution": 256,
             "data_len": -1
         }
     },
@@ -71,7 +71,7 @@
             }
         },
         "diffusion": {
-            "image_size": 512,
+            "image_size": 256,
             "channels": 3,
             "conditional": true
         }
@@ -93,5 +93,9 @@
     },
     "wandb": {
         "project": "sr_ffhq"
+    },
+    "tiler": {
+        "tile_size": 256,
+        "tile_overlap": 32
     }
 }
