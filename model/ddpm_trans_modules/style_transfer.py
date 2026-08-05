@@ -1,5 +1,6 @@
 import torch
 import torchvision
+from torchvision.models import VGG16_Weights
 
 def gram_matrix(input):
     b, c, h, w = input.size()
@@ -11,10 +12,10 @@ class VGGPerceptualLoss(torch.nn.Module):
     def __init__(self, resize=False):
         super(VGGPerceptualLoss, self).__init__()
         blocks = []
-        blocks.append(torchvision.models.vgg16(pretrained=True).features[:4].eval())
-        blocks.append(torchvision.models.vgg16(pretrained=True).features[4:9].eval())
-        blocks.append(torchvision.models.vgg16(pretrained=True).features[9:16].eval())
-        blocks.append(torchvision.models.vgg16(pretrained=True).features[16:23].eval())
+        blocks.append(torchvision.models.vgg16(weights=VGG16_Weights.DEFAULT).features[:4].eval())
+        blocks.append(torchvision.models.vgg16(weights=VGG16_Weights.DEFAULT).features[4:9].eval())
+        blocks.append(torchvision.models.vgg16(weights=VGG16_Weights.DEFAULT).features[9:16].eval())
+        blocks.append(torchvision.models.vgg16(weights=VGG16_Weights.DEFAULT).features[16:23].eval())
         for bl in blocks:
             for p in bl.parameters():
                 p.requires_grad = False
