@@ -2,6 +2,7 @@ from io import BytesIO
 import lmdb
 from PIL import Image
 from torch.utils.data import Dataset
+from torchvision.transforms import functional as trans_fn
 import random
 import data.util as Util
 import numpy as np
@@ -152,3 +153,29 @@ class LRHRDataset2(Dataset):
             [img_SR, img_HR, img_style] = Util.transform_augment(
                 [img_SR, img_HR, img_style], split=self.split, min_max=(-1, 1))
             return {'HR': img_HR, 'SR': img_SR, 'style': img_style, 'Index': index}
+
+class TiledImage(Dataset):
+    def __init__(self, img_path, tile_size, overlap, l_resolution=16, r_resolution=256, split='val'):
+        self.img_path = img_path #Path of the image to be tiled
+        self.tile_size = tile_size # Size of each tile
+        self.overlap = overlap # Pixel overlap between adjacent tiles
+        self.image = Image.open(img_path).convert("RGB") # Open the image and convert to RGB
+        self.image_width, self.image_height = self.image.size # Get the width and height of the image
+        self.boxes = Util.get_shiftback_coordinates(self.image_height, self.image_width, tile_size, overlap) # Get the coordinates of the tiles
+        self.l_resolution = l_resolution # Desired low resolution for the noisy and style images
+        self.r_resolution = r_resolution # Desired high resolution for the noisy and style images
+        self.split = split # Split for data augmentation (train or val)
+
+    def __len__(self):
+        return len(self.boxes) # Return the number of tiles in the image
+
+    def __getitem__(self, index):
+        box = self.boxes[index] # Get the coordinates of the tile at the given index
+        tile = self.image.crop(box) # Crop the tile from the original image using the coordinates
+        img_HR = tile # The high-resolution image is the cropped tile
+        img_LR = trans_fn.resize(tile,self.l_resolution, resample=Image.BICUBIC) # Resize the tile to the desired low resolution using bicubic resampling
+        img_SR = trans_fn.resize(img_LR,self.r_resolution, resample=Image.BICUBIC) # Resize the low-resolution image back to the desired high resolution using bicubic resampling
+        img_style = img_SR  # The style image is the same as the super-resolved image
+        [img_SR, img_HR, img_style] = Util.transform_augment( 
+            [img_SR, img_HR, img_style], split=self.split, min_max=(-1, 1)) # Denormalize the images to the range (-1, 1) and apply data augmentation based on the split (train or val)
+        return {'HR': img_HR, 'SR': img_SR, 'style': img_style, 'Index': index}
