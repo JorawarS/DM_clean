@@ -81,3 +81,22 @@ def transform_augment(img_list, split='val', min_max=(0, 1)):
         imgs = torch.unbind(imgs, dim=0)
     ret_img = [img * (min_max[1] - min_max[0]) + min_max[0] for img in imgs] #de-normalize to range min_max
     return ret_img
+
+def get_shiftback_coordinates(img_h,img_w,tile_size=256,overlap=32):
+    #Get the coordinates of the tiles for the given image size, tile size and overlap
+    stride = tile_size - overlap
+    def _get_coordinates(dim_length):
+        coordinates = []
+        for pos in range(0, dim_length, stride):
+            if pos + tile_size >= dim_length:
+                coordinates.append(dim_length-tile_size)
+            else:
+                coordinates.append(pos)
+        return coordinates
+    y_coordinates = _get_coordinates(img_h)
+    x_coordinates = _get_coordinates(img_w)
+    boxes = [] #left, upper, right, lower
+    for x in x_coordinates:
+        for y in y_coordinates:
+            boxes.append((x, y, x+tile_size, y+tile_size)) #left, upper, right, lower
+    return boxes
