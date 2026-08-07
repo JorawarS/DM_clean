@@ -173,8 +173,8 @@ class TiledImage(Dataset):
         box = self.boxes[index] # Get the coordinates of the tile at the given index
         tile = self.image.crop(box) # Crop the tile from the original image using the coordinates
         img_HR = tile # The high-resolution image is the cropped tile
-        img_LR = trans_fn.resize(tile,self.l_resolution, resample=Image.BICUBIC) # Resize the tile to the desired low resolution using bicubic resampling
-        img_SR = trans_fn.resize(img_LR,self.r_resolution, resample=Image.BICUBIC) # Resize the low-resolution image back to the desired high resolution using bicubic resampling
+        img_LR = trans_fn.resize(tile,self.l_resolution, Image.BICUBIC) # Resize the tile to the desired low resolution using bicubic resampling
+        img_SR = trans_fn.resize(img_LR,self.r_resolution, Image.BICUBIC) # Resize the low-resolution image back to the desired high resolution using bicubic resampling
         img_style = img_SR  # The style image is the same as the super-resolved image
         [img_SR, img_HR, img_style] = Util.transform_augment( 
             [img_SR, img_HR, img_style], split=self.split, min_max=(-1, 1)) # Denormalize the images to the range (-1, 1) and apply data augmentation based on the split (train or val)

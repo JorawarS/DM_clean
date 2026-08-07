@@ -30,8 +30,8 @@
             "mode": "HR",
             "dataroot": "dataset/quai_background",
             "datatype": "img",
-            "l_resolution": 16,
-            "r_resolution": 256,
+            "l_resolution": 512,
+            "r_resolution": 512,
             "data_len": -1
         }
     },
@@ -71,7 +71,7 @@
             }
         },
         "diffusion": {
-            "image_size": 256,
+            "image_size": 512,
             "channels": 3,
             "conditional": true
         }
@@ -95,7 +95,6 @@
         "project": "sr_ffhq"
     },
     "tiler": {
-        "tile_size": 256,
         "overlap": 32
     }
 }

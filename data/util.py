@@ -100,3 +100,37 @@ def get_shiftback_coordinates(img_h,img_w,tile_size=256,overlap=32):
         for y in y_coordinates:
             boxes.append((x, y, x+tile_size, y+tile_size)) #left, upper, right, lower
     return boxes
+
+def generate_gaussian_weight_map(tile_size=256, sigma=None, device='cuda'):
+    """
+    Generates a 2D Gaussian weight matrix for blending image tiles.
+    
+    Args:
+        tile_size (int): The height and width of the square tile.
+        sigma (float): The standard deviation of the Gaussian. Controls how fast it fades.
+        device (str): 'cuda' or 'cpu'.
+        
+    Returns:
+        torch.Tensor: A tensor of shape (1, tile_size, tile_size) containing the weights.
+    """
+    if sigma is None:
+        # A sigma of tile_size / 4 ensures a smooth fade that doesn't drop to absolute zero 
+        # too quickly, preventing division-by-zero errors when normalizing later.
+        sigma = tile_size / 4.0
+
+    # 1. Create a 1D coordinate grid from 0 to tile_size-1
+    coords = torch.arange(tile_size, dtype=torch.float32, device=device)
+
+    # 2. Shift coordinates so the origin (0) is exactly in the center of the tile
+    center = (tile_size - 1) / 2.0
+    coords = coords - center
+
+    # 3. Compute the 1D Gaussian curve
+    g_1d = torch.exp(-(coords ** 2) / (2 * sigma ** 2))
+
+    # 4. Create the 2D Gaussian by taking the outer product of the 1D curve with itself
+    g_2d = torch.outer(g_1d, g_1d)
+
+    # 5. Add a channel dimension so it shapes to (1, tile_size, tile_size)
+    # This allows standard PyTorch broadcasting: (3, 256, 256) * (1, 256, 256)
+    return g_2d.unsqueeze(0)

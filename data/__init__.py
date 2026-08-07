@@ -1,5 +1,6 @@
 '''create dataset and dataloader'''
 import logging
+import data.util as util
 from re import split
 import torch.utils.data
 
@@ -36,4 +37,19 @@ def create_dataset(dataset_opt, phase):
     logger = logging.getLogger('base')
     logger.info('Dataset [{:s} - {:s}] is created.'.format(dataset.__class__.__name__,
                                                            dataset_opt['name']))
+    return dataset
+
+def create_tiled_dataset(img_path, dataset_opt, phase, tiler_opt):
+    '''create tiled dataset'''
+    from data.LRHR_dataset import TiledImage as D
+    dataset = D(img_path=img_path,
+                tile_size=dataset_opt['r_resolution'],
+                overlap=tiler_opt['overlap'],
+                l_resolution=dataset_opt['l_resolution'],
+                r_resolution=dataset_opt['r_resolution'],
+                split=phase
+                )
+    logger = logging.getLogger('base')
+    logger.info('Tiled Dataset [{:s} - {:s}] is created.'.format(dataset.__class__.__name__,
+                                                                 dataset_opt['name']))
     return dataset
